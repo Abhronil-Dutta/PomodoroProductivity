@@ -1,6 +1,9 @@
 # General
 .DS_Store
 .env
+node_modules
+package-lock.json
+package.json
 
 # Node.js (React Native frontend)
 frontend/node_modules/
