@@ -1,21 +1,21 @@
 import React from 'react';
-import {Text, View, StyleSheet} from 'react-native';
-import Timer from './scripts/Timer.js';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
+import HomeScreen from './screens/Homescreen'; // Placeholder for the main app screen
 
-const App = () => {
+const Stack = createStackNavigator();
+
+export default function App() {
   return (
-    <Timer />
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SignUp" component={SignupScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-};
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-  
-  },
-});
-
-export default App;

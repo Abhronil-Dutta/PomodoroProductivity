@@ -18,7 +18,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/users/signup", // Public access for sign-up
-                    "/api/users/login"   // Public access for login
+                    "/api/users/login",
+                    "/error"  // Public access for login
                 ).permitAll()
                 .anyRequest().authenticated() // Other endpoints require authentication
             )
