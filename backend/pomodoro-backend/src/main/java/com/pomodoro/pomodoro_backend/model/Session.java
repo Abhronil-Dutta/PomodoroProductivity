@@ -3,37 +3,41 @@
 
 package com.pomodoro.pomodoro_backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import java.util.Date;
 
-@Entity // Marks this class as a database table
+@Entity
+@Table(name = "sessions")
 public class Session {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Id // Marks this field as the primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment for primary key
-    private int id;
-    private int userId; // To associate sessions with a user
-    private Date date; // Date of the session
-    private int duration; // Duration of the session in minutes
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    // Getters and Setters
-    public int getId() {
+    @Column(nullable = false)
+    private Date date;
+
+    @Column(nullable = false)
+    private int duration; // Duration in minutes
+
+    // Getters and setters
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Date getDate() {
@@ -52,4 +56,5 @@ public class Session {
         this.duration = duration;
     }
 }
+
 

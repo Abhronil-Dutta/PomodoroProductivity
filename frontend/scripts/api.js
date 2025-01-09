@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://153.33.8.38:8080/api/sessions';
+const API_URL = 'http://localhost:8080/api/sessions'; 
 
 export const saveSession = async (session) => {
     try {
@@ -12,14 +12,12 @@ export const saveSession = async (session) => {
     }
 };
 
-export const getSessionsByDateRange = async (startDate, endDate) => {
+export const getSessionsByUser = async (userId) => {
     try {
-        const response = await axios.get(`${API_URL}/date-range`, {
-            params: {startDate, endDate},
-        });
+        const response = await axios.get(`${API_URL}/user/${userId}`);
         return response.data;
     } catch (error) {
-        console.error('Error fetching sessions by date range: ' , error);
+        console.error('Error fetching sessions by user: ', error);
         throw error;
     }
 };

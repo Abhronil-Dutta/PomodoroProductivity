@@ -3,9 +3,8 @@ package com.pomodoro.pomodoro_backend.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users") // Matches the database table
+@Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,7 +15,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // Getters and Setters
+    // Getters and setters
     public Long getId() {
         return id;
     }

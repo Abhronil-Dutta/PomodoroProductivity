@@ -1,9 +1,11 @@
 package com.pomodoro.pomodoro_backend.controller;
 
 import com.pomodoro.pomodoro_backend.model.User;
-import com.pomodoro.pomodoro_backend.service.UserService;
+import com.pomodoro.pomodoro_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Map;
 
 @RestController
@@ -11,20 +13,41 @@ import java.util.Map;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     @PostMapping("/signup")
-    public User signUp(@RequestBody Map<String, String> payload) { // Use @RequestBody if you're sending JSON
+    public ResponseEntity<String> signup(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
         String password = payload.get("password");
-        return userService.signUp(username, password);
+
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body("Username and password are required");
+        }
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            return ResponseEntity.badRequest().body("Username already exists");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password); // Store plain text password (hashing optional)
+        userRepository.save(user);
+
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/login")
-    public User logIn(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<String> login(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
         String password = payload.get("password");
-        return userService.logIn(username, password);
+
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null || !user.getPassword().equals(password)) {
+            return ResponseEntity.status(401).body("Invalid username or password");
+        }
+
+        return ResponseEntity.ok("Login successful");
     }
 }
+
 

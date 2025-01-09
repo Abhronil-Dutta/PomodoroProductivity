@@ -1,42 +1,50 @@
 package com.pomodoro.pomodoro_backend.controller;
 
 import com.pomodoro.pomodoro_backend.model.Session;
-import com.pomodoro.pomodoro_backend.service.SessionService;
-
+import com.pomodoro.pomodoro_backend.model.User;
+import com.pomodoro.pomodoro_backend.repository.SessionRepository;
+import com.pomodoro.pomodoro_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
-import java.time.LocalDate;
-
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/sessions") // Base URL for all endpoints in this controller
+@RequestMapping("/api/sessions")
 public class SessionController {
 
     @Autowired
-    private SessionService sessionService;
+    private SessionRepository sessionRepository;
 
-    // Endpoint to fetch all sessions
-    @GetMapping
-    public List<Session> getAllSessions() {
-        return sessionService.getAllSessions();
-    }
+    @Autowired
+    private UserRepository userRepository;
 
-    // Endpoint to save a session
     @PostMapping
-    public Session saveSession(@RequestBody Session session) {
-        return sessionService.saveSession(session);
+    public ResponseEntity<String> addSession(@RequestBody Session session, @RequestParam Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        session.setUser(user.get());
+        session.setDate(new Date());
+        sessionRepository.save(session);
+
+        return ResponseEntity.ok("Session added successfully");
     }
 
-    @GetMapping("/date-range")
-    public List<Session> getSessionsByDateRange(
-        @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-            System.out.println("Received startDate: " + startDate);
-            System.out.println("Received endDate: " + endDate);
-    return sessionService.getSessionsByDateRange(startDate, endDate);
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Session>> getSessionsByUser(@PathVariable Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        List<Session> sessions = sessionRepository.findByUser(user.get());
+        return ResponseEntity.ok(sessions);
+    }
 }
-}
+
