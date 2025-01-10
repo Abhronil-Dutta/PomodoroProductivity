@@ -24,6 +24,10 @@ public class SessionController {
 
     @PostMapping
     public ResponseEntity<String> addSession(@RequestBody Session session, @RequestParam Long userId) {
+        if (userId == null || userId <= 0) {
+            return ResponseEntity.badRequest().body("Invalid userId");
+        }
+
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             return ResponseEntity.badRequest().body("User not found");
@@ -46,5 +50,6 @@ public class SessionController {
         List<Session> sessions = sessionRepository.findByUser(user.get());
         return ResponseEntity.ok(sessions);
     }
+    
 }
 

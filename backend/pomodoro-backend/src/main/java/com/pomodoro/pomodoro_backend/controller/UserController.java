@@ -3,10 +3,13 @@ package com.pomodoro.pomodoro_backend.controller;
 import com.pomodoro.pomodoro_backend.model.User;
 import com.pomodoro.pomodoro_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -16,38 +19,39 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Map<String, Object>> createUser(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
         String password = payload.get("password");
 
-        if (username == null || password == null) {
-            return ResponseEntity.badRequest().body("Username and password are required");
+        Optional<User> existingUser = userRepository.findByUsername(username);
+        if (existingUser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
-        if (userRepository.findByUsername(username).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
-        }
+        User newUser = new User();
+        newUser.setUsername(username);
+        newUser.setPassword(password);
+        User savedUser = userRepository.save(newUser);
 
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password); // Store plain text password (hashing optional)
-        userRepository.save(user);
-
-        return ResponseEntity.ok("User registered successfully");
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", savedUser.getId());
+        response.put("username", savedUser.getUsername());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
         String password = payload.get("password");
 
-        User user = userRepository.findByUsername(username).orElse(null);
-        if (user == null || !user.getPassword().equals(password)) {
-            return ResponseEntity.status(401).body("Invalid username or password");
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent() && user.get().getPassword().equals(password)) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", user.get().getId());
+            response.put("username", user.get().getUsername());
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        return ResponseEntity.ok("Login successful");
     }
 }
-
-

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import axios from 'axios';
+import { login, signup } from '../scripts/api';
 
 export default function SignupScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -8,19 +8,36 @@ export default function SignupScreen({ navigation }) {
 
   const handleSignUp = async () => {
     try {
-      await axios.post('http://localhost:8080/api/users/signup', { username, password });
-      Alert.alert('Success', 'Account created successfully!');
-      navigation.navigate('Login');
+        console.log('Sending signup request...');
+        const user = await signup(username, password);
+        if (!user.id) {
+            throw new Error('No userId returned from server.');
+        }
+        Alert.alert('Success', 'Account created successfully!');
+        navigation.navigate('Login');
     } catch (error) {
-      Alert.alert('Error', 'Failed to create an account.');
+        console.error('Signup failed:', error.message || error);
+        Alert.alert('Error', error.message || 'Could not create account. Try again.');
     }
   };
+
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sign Up</Text>
-      <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
       <Button title="Sign Up" onPress={handleSignUp} />
       <Text style={styles.link} onPress={() => navigation.navigate('Login')}>
         Already have an account? Login
